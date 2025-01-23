@@ -1,5 +1,5 @@
 # Use the Windows 11 base image
-FROM mcr.microsoft.com/windows/servercore:latest
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
 # Set working directory
 WORKDIR C:\app
