@@ -4,10 +4,10 @@ FROM dockurr/windows
 # Set environment variables (Windows version, language, storage path, etc.)
 ENV VERSION="11" \
     DISK_SIZE="64G" \
-    RAM_SIZE="28G" \   # Set RAM size to 28GB
-    CPU_CORES="6" \     # Set CPU cores to 6
-    USERNAME="iazp" \   # Set username to iazp
-    PASSWORD="1234" \   # Set password to 1234
+    RAM_SIZE="28G" \
+    CPU_CORES="6" \
+    USERNAME="iazp" \
+    PASSWORD="1234" \
     LANGUAGE="English" \
     REGION="en-US" \
     KEYBOARD="en-US"
