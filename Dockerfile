@@ -14,7 +14,7 @@ ENV VERSION="11" \
     KVM="N"
 
 # Expose the ports for RDP and web-based viewer
-EXPOSE 8006 3389
+EXPOSE 8006 3389 5700 5900
 
 # Mount points for shared folders or volumes
 VOLUME ["/storage", "/oem"]
