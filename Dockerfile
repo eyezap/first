@@ -19,12 +19,11 @@ EXPOSE 8006 3389 5700 5900
 # Mount points for shared folders or volumes
 VOLUME ["/storage", "/oem"]
 
-# Ensure the correct folder exists before copying
-RUN mkdir -p /oem
+# Create directories for /storage and /oem
+RUN mkdir -p /oem /storage
 
-# Copy the disk image into the container (Ensure this path is correct)
-COPY windows_disk.img /storage/windows_disk.img
-COPY windows.iso /storage/windows.iso
+# Create empty placeholder files for windows_disk.img and windows.iso in the /storage folder
+RUN touch /storage/windows_disk.img /storage/windows.iso
 
 # Set the entrypoint and command to use environment variables
 ENTRYPOINT ["qemu-system-x86_64"]
