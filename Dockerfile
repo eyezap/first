@@ -19,10 +19,8 @@ EXPOSE 8006 3389
 VOLUME ["/storage", "/oem"]
 
 # Ensure the correct folder exists before copying
-RUN mkdir -p /oem/
+RUN mkdir -p /oem
 
-# Copy the custom files into the container (make sure this folder exists locally)
-COPY ./custom_files /oem/
+# You may want to add some installation commands here if needed
+# Example: RUN apt-get update && apt-get install -y some-package
 
-# Command to run when the container starts
-CMD ["start", "/bin/bash"]
