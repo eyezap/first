@@ -1,14 +1,26 @@
-# Use the base image for Ubuntu with NoVNC
-FROM fredblgr/ubuntu-novnc:20.04
+# Use the official dockurr/windows image as the base image
+FROM dockurr/windows
 
-# Expose the ports NoVNC and VNC server will use
-EXPOSE 80 5901
+# Set environment variables (Windows version, language, storage path, etc.)
+ENV VERSION="11" \
+    DISK_SIZE="64G" \
+    RAM_SIZE="28G" \   # Set RAM size to 28GB
+    CPU_CORES="6" \     # Set CPU cores to 6
+    USERNAME="iazp" \   # Set username to iazp
+    PASSWORD="1234" \   # Set password to 1234
+    LANGUAGE="English" \
+    REGION="en-US" \
+    KEYBOARD="en-US"
 
-# Set the environment variable for screen resolution (Optional)
-ENV RESOLUTION 1707x1067
+# Expose the ports for RDP and web-based viewer
+EXPOSE 8006 3389
 
-# If you want to customize VNC resolution, ensure it's set in the startup script
-RUN echo "Xvnc -geometry ${RESOLUTION} -depth 24 :1 &" > /root/start_vnc.sh && chmod +x /root/start_vnc.sh
+# Mount points for shared folders or volumes
+VOLUME ["/storage", "/oem"]
 
-# Use supervisor to run the VNC server and NoVNC proxy
-CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+# Additional software installation steps or customizations
+# You can also add a script to run after installation like install.bat
+COPY ./path/to/custom/files /oem/
+
+# Command to run when the container starts
+CMD ["start", "/bin/bash"]
