@@ -1,45 +1,14 @@
-# Use the latest Ubuntu image
-FROM ubuntu:latest
+# Use the base image for Ubuntu with NoVNC
+FROM fredblgr/ubuntu-novnc:20.04
 
-# Set environment variables
-ENV USER=root
+# Expose the ports NoVNC and VNC server will use
+EXPOSE 80 5901
 
-# Install necessary packages
-RUN apt-get update && apt-get install -y \
-    sudo \
-    wget \
-    curl \
-    gnupg2 \
-    lsb-release \
-    ca-certificates \
-    unzip \
-    python3 \
-    python3-pip \
-    xorg \
-    openbox \
-    tightvncserver \
-    novnc \
-    websockify \
-    xfce4 \
-    xfce4-goodies \
-    && apt-get clean
+# Set the environment variable for screen resolution (Optional)
+ENV RESOLUTION 1707x1067
 
-# Install noVNC and Websockify
-RUN wget https://github.com/novnc/noVNC/archive/v1.2.0.tar.gz && \
-    tar -xvzf v1.2.0.tar.gz && \
-    mv noVNC-1.2.0 /usr/local/noVNC
+# If you want to customize VNC resolution, ensure it's set in the startup script
+RUN echo "Xvnc -geometry ${RESOLUTION} -depth 24 :1 &" > /root/start_vnc.sh && chmod +x /root/start_vnc.sh
 
-# Expose ports for VNC and noVNC
-EXPOSE 5901 6080
-
-# Set up VNC server
-RUN mkdir /root/.vnc && \
-    echo "password" | vncpasswd -f > /root/.vnc/passwd && \
-    chmod 0600 /root/.vnc/passwd
-
-# Set up default window manager (Xfce)
-RUN echo "startxfce4 &" > ~/.xinitrc
-
-# Start VNC and noVNC
-CMD /usr/bin/tightvncserver :1 && \
-    /usr/local/noVNC/utils/novnc_proxy --vnc localhost:5901 --listen 6080
+# Use supervisor to run the VNC server and NoVNC proxy
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
