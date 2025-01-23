@@ -21,10 +21,3 @@ VOLUME ["/storage", "/oem"]
 
 # Create directories for /storage and /oem
 RUN mkdir -p /oem /storage
-
-# Create empty placeholder files for windows_disk.img and windows.iso in the /storage folder
-RUN touch /storage/windows_disk.img /storage/windows.iso
-
-# Set the entrypoint and command to use environment variables
-ENTRYPOINT ["qemu-system-x86_64"]
-CMD ["-m", "${RAM_SIZE}", "-smp", "${CPU_CORES}", "-drive", "file=/storage/windows_disk.img,format=raw,if=virtio", "-cdrom", "/storage/windows.iso", "-boot", "order=d", "-netdev", "user,id=mynet0", "-device", "virtio-net,netdev=mynet0", "-vnc", ":0", "-display", "vnc=0.0.0.0:0", "-drive", "file=/oem/win11x64.xml,format=raw", "-enable-kvm"]
