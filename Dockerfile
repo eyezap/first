@@ -14,7 +14,7 @@ ENV VERSION="7e" \
     KVM="N"
 
 # Expose the ports for RDP and web-based viewer
-EXPOSE 8006 3389 5700 5900
+EXPOSE 8006 3389/tcp 3389/udp 5700 5900
 
 # Mount points for shared folders or volumes
 VOLUME ["/storage", "/oem"]
@@ -22,6 +22,8 @@ VOLUME ["/storage", "/oem"]
 # Create directories for /storage and /oem
 RUN mkdir -p /oem /storage
 
-# Set the entrypoint and command to use environment variables
-ENTRYPOINT ["qemu-system-x86_64"]
-CMD ["-m", "${RAM_SIZE}", "-smp", "${CPU_CORES}", "-drive", "file=/storage/windows_disk.img,format=raw,if=virtio", "-cdrom", "/storage/windows.iso", "-boot", "order=d", "-netdev", "user,id=mynet0,hostfwd=tcp::8006-:8006", "-device", "virtio-net,netdev=mynet0", "-vnc", ":0", "-display", "vnc=0.0.0.0:0", "-drive", "file=/oem/win11x64.xml,format=raw", "-enable-kvm", "-device", "virtio-serial"]
+# Add any additional setup commands if needed
+# RUN some-command
+
+# Set the default command to run when the container starts
+CMD ["start-windows"]
