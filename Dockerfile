@@ -2,7 +2,7 @@
 FROM dockurr/windows
 
 # Set environment variables (Windows version, language, storage path, etc.)
-ENV VERSION="11" \
+ENV VERSION="7e" \
     DISK_SIZE="120G" \
     RAM_SIZE="28G" \
     CPU_CORES="6" \
