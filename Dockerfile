@@ -1,5 +1,5 @@
 # Use the base image for Ubuntu with NoVNC
-FROM fredblgr/ubuntu-novnc:20.04
+FROM babim/ubuntu-novnc:20.04
 
 # Expose the ports NoVNC and VNC server will use
 EXPOSE 80 5901
