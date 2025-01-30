@@ -1,9 +1,12 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Configure dpkg to skip problematic packages
-RUN mkdir -p /etc/apt/preferences.d && \
-    echo 'Package: libfprint-2-2\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/libfprint-2-2
+# Fix broken packages and configure dpkg to skip problematic packages
+RUN apt-get update && \
+    apt-get install -f -y && \
+    dpkg --configure -a && \
+    echo 'Package: gvfs*\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/gvfs && \
+    echo 'Package: udisks2\nPin: release *\nPin-Priority: -1' > /etc/apt/preferences.d/udisks2
 
 # Install only the necessary packages
 RUN apt-get update && apt-get install -y \
