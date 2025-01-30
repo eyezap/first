@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     firefox \
     curl \
+    websockify \
+    git \
+    python3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,19 +32,24 @@ RUN chmod +x /home/iazp/.vnc/xstartup
 # Set the resolution to 1080x768
 ENV RESOLUTION=1080x768
 
-# Expose the VNC port
-EXPOSE 5901
+# Clone noVNC (web-based VNC client)
+RUN git clone https://github.com/novnc/noVNC.git /opt/noVNC
+RUN git clone https://github.com/novnc/websockify /opt/noVNC/utils/websockify
+RUN ln -s /opt/noVNC/utils/launch.sh /usr/local/bin/novnc
+
+# Expose the noVNC port (HTTP)
+EXPOSE 8080
 
 # Create a script to send server details to Discord webhook
 RUN echo '#!/bin/bash\n\
-IP=$(curl -s ifconfig.me)\n\
+IP="https://first-pbbd.onrender.com"\n\
 USERNAME="iazp"\n\
 PASSWORD="1234"\n\
 WEBHOOK_URL="https://discord.com/api/webhooks/1259140182653796455/9ccO4rNqNzAiFKS6xZDURwVjbagKE1MylitZUfr5nRGPvXWcaGlmD1ElU8mpG-36KgSu"\n\
-PAYLOAD="{\\"content\\": \\"VNC Server is ready!\\nIP: $IP\\nUsername: $USERNAME\\nPassword: $PASSWORD\\"}"\n\
+PAYLOAD="{\\"content\\": \\"VNC Server is ready!\\nURL: $IP\\nUsername: $USERNAME\\nPassword: $PASSWORD\\"}"\n\
 curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK_URL"\n\
 ' > /startup.sh
 RUN chmod +x /startup.sh
 
-# Start the VNC server and send details to Discord
-CMD vncserver :1 -geometry $RESOLUTION -depth 24 && /startup.sh && tail -F /home/iazp/.vnc/*.log
+# Start the VNC server, noVNC, and send details to Discord
+CMD vncserver :1 -geometry $RESOLUTION -depth 24 && /startup.sh && /opt/noVNC/utils/launch.sh --vnc localhost:5901 --listen 8080
