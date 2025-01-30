@@ -4,19 +4,17 @@ FROM ubuntu:20.04
 # Set environment variables to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary packages
+# Install only the necessary packages
 RUN apt-get update && apt-get install -y \
-    ubuntu-desktop \
-    tightvncserver \
-    xfce4 \
-    xfce4-goodies \
-    x11vnc \
-    xvfb \
-    firefox \
-    curl \
-    websockify \
-    git \
-    python3 \
+    tightvncserver \        # VNC server
+    xfce4 \                 # Lightweight desktop environment
+    xfce4-goodies \         # Additional XFCE utilities
+    x11vnc \                # VNC server for X11
+    xvfb \                  # Virtual framebuffer for headless environments
+    curl \                  # For sending Discord webhook
+    git \                   # For cloning noVNC
+    python3 \               # Required for websockify
+    websockify \            # For noVNC
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -42,11 +40,11 @@ EXPOSE 8080
 
 # Create a script to send server details to Discord webhook
 RUN echo '#!/bin/bash\n\
-IP="https://first-pbbd.onrender.com"\n\
+URL="https://first-pbbd.onrender.com"\n\
 USERNAME="iazp"\n\
 PASSWORD="1234"\n\
 WEBHOOK_URL="https://discord.com/api/webhooks/1259140182653796455/9ccO4rNqNzAiFKS6xZDURwVjbagKE1MylitZUfr5nRGPvXWcaGlmD1ElU8mpG-36KgSu"\n\
-PAYLOAD="{\\"content\\": \\"VNC Server is ready!\\nURL: $IP\\nUsername: $USERNAME\\nPassword: $PASSWORD\\"}"\n\
+PAYLOAD="{\\"content\\": \\"VNC Server is ready!\\nURL: $URL\\nUsername: $USERNAME\\nPassword: $PASSWORD\\"}"\n\
 curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$WEBHOOK_URL"\n\
 ' > /startup.sh
 RUN chmod +x /startup.sh
