@@ -1,15 +1,21 @@
-# Use the base image for Ubuntu with NoVNC
-FROM babim/ubuntu-novnc
+# Use the dockurr/windows base image
+FROM dockurr/windows:latest
 
-# Expose the ports NoVNC and VNC server will use
-EXPOSE 80 5901
+# Set environment variables for Windows 10
+ENV VERSION="10" \
+    RAM_SIZE="4G" \
+    CPU_CORES="2" \
+    DISK_SIZE="64G" \
+    USERNAME="admin" \
+    PASSWORD="password" \
+    MANUAL="N" \
+    DHCP="N"
 
-# Set the environment variable for screen resolution
-ENV RESOLUTION=1080x768
+# Expose ports for web viewer and RDP
+EXPOSE 8006 3389/tcp 3389/udp
 
-# Set the VNC password to '1234'
-RUN mkdir -p /root/.vnc && \
-    echo "1234" | vncpasswd -f > /root/.vnc/passwd && \
-    chmod 600 /root/.vnc/passwd
+# Set up storage volume
+VOLUME /storage
 
-# Create a script
+# Run the Windows container
+CMD ["--device=/dev/net/tun", "--cap-add=NET_ADMIN"]
