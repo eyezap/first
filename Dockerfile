@@ -1,4 +1,4 @@
-FROM dockurr/windows:latest
+FROM ubuntu:latest
 
 ENV VERSION="10" \
     RAM_SIZE="4G" \
@@ -10,19 +10,16 @@ ENV VERSION="10" \
     DHCP="N" \
     KVM="N"
 
-# Ensure /dev/net/tun exists for networking
-RUN mkdir -p /dev/net && \
-    mknod /dev/net/tun c 10 200 || true && \
-    chmod 600 /dev/net/tun
+# Install necessary packages
+RUN apt-get update && \
+    apt-get install -y qemu-system-x86 qemu-utils iproute2 iputils-ping net-tools dnsutils && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install necessary networking utilities
-RUN apt-get update && apt-get install -y iproute2 iputils-ping net-tools dnsutils
+# Create /storage directory for Windows image
+RUN mkdir -p /storage && chmod 777 /storage
 
 # Expose necessary ports
 EXPOSE 8006 3389/tcp 3389/udp
-
-# Define storage volume
-VOLUME /storage
 
 # Run QEMU without KVM
 CMD ["qemu-system-x86_64", \
