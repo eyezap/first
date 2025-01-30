@@ -1,38 +1,36 @@
-# Use a proper Windows-based image
 FROM dockurr/windows:latest
 
-# Set environment variables
-ENV VERSION="10" `
-    RAM_SIZE="4G" `
-    CPU_CORES="2" `
-    DISK_SIZE="64G" `
-    USERNAME="admin" `
-    PASSWORD="password" `
-    MANUAL="N" `
-    DHCP="N" `
+# Environment variables for customization
+ENV VERSION="10" \
+    RAM_SIZE="4G" \
+    CPU_CORES="2" \
+    DISK_SIZE="64G" \
+    USERNAME="admin" \
+    PASSWORD="password" \
+    MANUAL="N" \
+    DHCP="N" \
     KVM="N"
 
-# Set execution policy for PowerShell scripts (if needed)
-SHELL ["powershell", "-Command"]
+# Ensure /dev/net/tun exists for networking
+RUN mkdir -p /dev/net && \
+    [ -e /dev/net/tun ] || mknod /dev/net/tun c 10 200 && \
+    chmod 600 /dev/net/tun
 
-# Ensure QEMU is installed (use the proper installer for Windows)
-RUN Invoke-WebRequest -Uri "https://qemu.weilnetz.de/w64/qemu-w64-setup-20230822.exe" -OutFile "qemu-setup.exe"; `
-    Start-Process -FilePath ".\qemu-setup.exe" -ArgumentList "/S" -Wait; `
-    Remove-Item -Path ".\qemu-setup.exe"
+# Install necessary networking utilities
+RUN apt-get update && \
+    apt-get install -y iproute2 iputils-ping net-tools dnsutils && \
+    rm -rf /var/lib/apt/lists/*
 
-# Create a storage directory
-RUN New-Item -ItemType Directory -Path "C:\storage" -Force
-
-# Expose necessary ports (Remote Desktop & QEMU)
+# Expose necessary ports
 EXPOSE 8006 3389
 
 # Define storage volume
-VOLUME C:\storage
+VOLUME /storage
 
-# Run QEMU without KVM
-CMD qemu-system-x86_64.exe `
-    -m $env:RAM_SIZE `
-    -smp $env:CPU_CORES `
-    -drive file=C:\storage\windows.img,format=raw `
-    -netdev user,id=net0 `
-    -device e1000,netdev=net0
+# Run QEMU with parameters
+CMD ["qemu-system-x86_64", \
+    "-m", "$RAM_SIZE", \
+    "-smp", "$CPU_CORES", \
+    "-drive", "file=/storage/windows.img,format=raw", \
+    "-netdev", "user,id=net0", \
+    "-device", "e1000,netdev=net0"]
