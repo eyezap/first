@@ -17,5 +17,5 @@ EXPOSE 8006 3389/tcp 3389/udp
 # Set up storage volume
 VOLUME /storage
 
-# Run the Windows container
-CMD ["--device=/dev/net/tun", "--cap-add=NET_ADMIN"]
+# Use the default command from the base image
+# Do not override CMD or ENTRYPOINT unless necessary
